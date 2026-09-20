@@ -339,6 +339,4 @@ The production principle remains unchanged: the model interprets intent and mana
 
 ---
 
-## Licence
 
-No licence has been added to this proof of concept.
