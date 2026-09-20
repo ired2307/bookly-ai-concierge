@@ -349,3 +349,7 @@ This repository is deliberately a proof of concept. It demonstrates the control 
 The production principle remains unchanged: the model interprets intent and manages the conversation, while trusted systems control identity, facts, policy, customer consent and action authority.
 
 ---
+
+## Licence
+
+No licence has been added to this proof of concept.
