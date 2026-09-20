@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookly AI Concierge</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #0a0a0a;
+  color: #e8e8e8;
+  height: 100dvh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── LEFT PANEL ── */
+.panel {
+  width: 340px;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, #1a1008 0%, #0d0d0d 60%, #0a0a0a 100%);
+  border-right: 1px solid #1e1e1e;
+  display: flex;
+  flex-direction: column;
+  padding: 36px 28px 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,120,40,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; }
+.brand-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #c8821a, #7a4f10);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.brand-name { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+
+.aria-intro { margin-bottom: 32px; }
+.aria-intro .aria-name {
+  font-size: 13px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  color: #b87a22; margin-bottom: 6px;
+}
+.aria-intro h2 {
+  font-size: 22px; font-weight: 700; line-height: 1.3;
+  color: #fff; margin-bottom: 10px;
+}
+.aria-intro p {
+  font-size: 13px; line-height: 1.6; color: #666;
+}
+
+.mode-selector { margin-bottom: 28px; }
+.mode-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mode-button {
+  background: #111; border: 1px solid #282828; color: #777;
+  border-radius: 8px; padding: 9px 8px; font-size: 11px; cursor: pointer;
+}
+.mode-button:hover { border-color: #555; color: #bbb; }
+.mode-button.active {
+  color: #e7bd78; border-color: #7a4f10; background: rgba(180,120,40,0.12);
+}
+
+.caps-label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: #444; margin-bottom: 14px;
+}
+
+.caps { display: flex; flex-direction: column; gap: 10px; }
+
+.cap-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.cap-icon {
+  width: 30px; height: 30px; flex-shrink: 0;
+  border-radius: 8px;
+  background: rgba(180,120,40,0.12);
+  border: 1px solid rgba(180,120,40,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.cap-text {}
+.cap-title { font-size: 13px; font-weight: 600; color: #ccc; margin-bottom: 2px; }
+.cap-desc { font-size: 12px; color: #555; line-height: 1.4; }
+
+.panel-footer {
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid #1a1a1a;
+}
+.test-label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: #333; margin-bottom: 10px;
+}
+.test-orders { display: flex; flex-direction: column; gap: 6px; }
+.order-chip {
+  font-size: 11px;
+  font-family: 'Consolas', monospace;
+  color: #444;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #1a1a1a;
+  border-radius: 5px;
+  padding: 4px 8px;
+  line-height: 1.4;
+}
+.order-chip span { color: #666; }
+
+/* ── CHAT SHELL ── */
+.shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #1e1e1e;
+  background: #0d0d0d;
+  flex-shrink: 0;
+}
+.hd-left { display: flex; flex-direction: column; gap: 2px; }
+.hd-left .name { font-size: 15px; font-weight: 700; }
+.hd-left .sub  { font-size: 12px; color: #555; }
+.hd-right { display: flex; align-items: center; gap: 8px; }
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #3a9e5a; box-shadow: 0 0 6px #3a9e5a88;
+}
+.status-txt { font-size: 12px; color: #555; }
+button.new-chat {
+  background: #1a1a1a; border: 1px solid #2a2a2a;
+  color: #888; font-size: 12px;
+  padding: 5px 12px; border-radius: 6px; cursor: pointer;
+}
+button.new-chat:hover { border-color: #444; color: #bbb; }
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  scroll-behavior: smooth;
+}
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+.msg-row { display: flex; flex-direction: column; gap: 6px; }
+.msg-row.user { align-items: flex-end; }
+.msg-row.agent { align-items: flex-start; }
+
+.bubble {
+  max-width: 78%;
+  padding: 11px 15px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.msg-row.user .bubble {
+  background: #1a3554; border: 1px solid #1e4a7a;
+  color: #c8deff; border-bottom-right-radius: 4px;
+}
+.msg-row.agent .bubble {
+  background: #161616; border: 1px solid #242424;
+  color: #e0e0e0; border-bottom-left-radius: 4px;
+}
+
+.tool-trace { display: flex; flex-wrap: wrap; gap: 5px; max-width: 78%; padding-left: 2px; }
+.tool-chip {
+  font-size: 11px; font-family: 'Consolas', monospace;
+  background: #111; border: 1px solid #252525;
+  color: #555; padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+}
+
+.confirmation-card {
+  max-width: 78%; background: #15120e; border: 1px solid #6f4b1b;
+  border-radius: 10px; padding: 12px 14px; color: #bbb;
+}
+.confirmation-title { color: #f0d09b; font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+.confirmation-details { font-size: 12px; line-height: 1.5; margin-bottom: 10px; }
+.confirm-button {
+  background: #9a6418; border: 1px solid #c8821a; color: #fff;
+  border-radius: 7px; padding: 7px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.confirm-button:hover { background: #b6761c; }
+.confirm-button:disabled { opacity: 0.45; cursor: default; }
+
+.typing { display: flex; gap: 5px; align-items: center; padding: 12px 15px; }
+.typing span {
+  width: 6px; height: 6px; border-radius: 50%; background: #444;
+  animation: bounce 1.2s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); background: #333; }
+  30% { transform: translateY(-5px); background: #666; }
+}
+
+.input-bar {
+  display: flex; gap: 10px;
+  padding: 14px 24px;
+  border-top: 1px solid #1e1e1e;
+  background: #0d0d0d; flex-shrink: 0;
+}
+textarea {
+  flex: 1;
+  background: #141414; border: 1px solid #2a2a2a;
+  border-radius: 10px; color: #e8e8e8;
+  font-family: inherit; font-size: 14px;
+  padding: 10px 14px; resize: none; outline: none;
+  max-height: 120px; line-height: 1.5;
+}
+textarea:focus { border-color: #3a5a8a; }
+textarea::placeholder { color: #444; }
+button.send {
+  background: #1a3a6a; border: 1px solid #2a5aaa;
+  color: #7ab4ff; border-radius: 10px;
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; align-self: flex-end;
+}
+button.send:hover { background: #1e4a8a; }
+button.send:disabled { opacity: 0.35; cursor: default; }
+button.send svg { width: 18px; height: 18px; }
+
+@media (max-width: 720px) {
+  .panel { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<aside class="panel">
+  <div class="brand">
+    <div class="brand-icon">📚</div>
+    <span class="brand-name">Bookly</span>
+  </div>
+
+  <div class="aria-intro">
+    <div class="aria-name">AI Concierge</div>
+    <h2>Meet Aria</h2>
+    <p>Instant support for policy questions and order status, with secure refund actions for signed-in customers.</p>
+  </div>
+
+  <div class="mode-selector">
+    <div class="caps-label">Demo customer</div>
+    <div class="mode-buttons">
+      <button class="mode-button active" data-mode="guest">Guest</button>
+      <button class="mode-button" data-mode="sarah_demo">Sarah Lee</button>
+    </div>
+  </div>
+
+  <div class="caps-label">What Aria can help with</div>
+  <div class="caps">
+    <div class="cap-item">
+      <div class="cap-icon">📦</div>
+      <div class="cap-text">
+        <div class="cap-title">Order tracking</div>
+        <div class="cap-desc">Check status, delivery date, and order details</div>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">↩️</div>
+      <div class="cap-text">
+        <div class="cap-title">Returns & refunds</div>
+        <div class="cap-desc">Available after sign-in, with eligibility check and confirmation</div>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">📋</div>
+      <div class="cap-text">
+        <div class="cap-title">Policy questions</div>
+        <div class="cap-desc">Shipping, returns, payment, and cancellation policies</div>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">🧑‍💼</div>
+      <div class="cap-text">
+        <div class="cap-title">Human escalation</div>
+        <div class="cap-desc">Seamless handoff for fraud, legal, or complex issues</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-footer">
+    <div class="test-label" id="demoLabel">Try guest order status</div>
+    <div class="test-orders" id="demoOrders">
+      <div class="order-chip">BK-10042 <span>jane.doe@email.com</span></div>
+    </div>
+  </div>
+</aside>
+
+<!-- CHAT -->
+<div class="shell">
+  <header>
+    <div class="hd-left">
+      <span class="name">Aria</span>
+      <span class="sub">Bookly Customer Support</span>
+    </div>
+    <div class="hd-right">
+      <span class="status-dot"></span>
+      <span class="status-txt">Online</span>
+      <button class="new-chat" id="btnNew">New conversation</button>
+    </div>
+  </header>
+
+  <div class="messages" id="msgs"></div>
+
+  <div class="input-bar">
+    <textarea id="input" rows="1" placeholder="Ask about your order, returns, or policies…"></textarea>
+    <button class="send" id="btnSend" title="Send">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  const msgs    = document.getElementById('msgs');
+  const input   = document.getElementById('input');
+  const btnSend = document.getElementById('btnSend');
+  const btnNew  = document.getElementById('btnNew');
+  const modeButtons = document.querySelectorAll('.mode-button');
+
+  let sessionId = null;
+  let sessionMode = 'guest';
+  let busy = false;
+
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  btnSend.addEventListener('click', send);
+
+  btnNew.addEventListener('click', () => startSession(sessionMode));
+  modeButtons.forEach(button => {
+    button.addEventListener('click', () => startSession(button.dataset.mode));
+  });
+
+  async function startSession(mode) {
+    busy = true;
+    btnSend.disabled = true;
+    input.disabled = true;
+    if (sessionId) {
+      await fetch(`/session/${sessionId}`, { method: 'DELETE' }).catch(() => {});
+    }
+
+    try {
+      const res = await fetch('/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode }),
+      });
+      if (!res.ok) throw new Error('Unable to create session');
+      const data = await res.json();
+      sessionId = data.session_id;
+      sessionMode = data.mode;
+      modeButtons.forEach(button => {
+        button.classList.toggle('active', button.dataset.mode === sessionMode);
+      });
+      updateDemoJourney();
+      document.querySelector('.status-txt').textContent = data.authenticated
+        ? `Signed in as ${data.customer_name}`
+        : 'Guest session';
+      msgs.replaceChildren();
+      addWelcome();
+    } catch {
+      sessionId = null;
+      msgs.replaceChildren();
+      addAgentMsg('The demo could not start a session. Please refresh and try again.', []);
+    } finally {
+      busy = false;
+      input.disabled = false;
+      btnSend.disabled = !sessionId;
+      if (sessionId) input.focus();
+    }
+  }
+
+  function addWelcome() {
+    const introduction = sessionMode === 'sarah_demo'
+      ? 'Hi Sarah, I\'m Aria. I can help with your Bookly orders, returns, refunds, and policy questions.'
+      : 'Hi, I\'m Aria. I can help with order status and Bookly policy questions. You can track an order as a guest using your order number and email.';
+    addAgentMsg(introduction, []);
+  }
+
+  function updateDemoJourney() {
+    const label = document.getElementById('demoLabel');
+    const orders = document.getElementById('demoOrders');
+    orders.replaceChildren();
+    const chip = document.createElement('div');
+    chip.className = 'order-chip';
+    if (sessionMode === 'sarah_demo') {
+      label.textContent = 'Try signed-in refund';
+      chip.textContent = 'BK-10105 · damaged delivery';
+    } else {
+      label.textContent = 'Try guest order status';
+      chip.append('BK-10042 ');
+      const email = document.createElement('span');
+      email.textContent = 'jane.doe@email.com';
+      chip.appendChild(email);
+    }
+    orders.appendChild(chip);
+  }
+
+  function addUserMsg(text) {
+    const row = document.createElement('div');
+    row.className = 'msg-row user';
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    b.textContent = text;
+    row.appendChild(b);
+    msgs.appendChild(row);
+    scrollBottom();
+  }
+
+  function addTyping() {
+    const row = document.createElement('div');
+    row.className = 'msg-row agent';
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const t = document.createElement('div');
+    t.className = 'typing';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    b.appendChild(t);
+    row.appendChild(b);
+    msgs.appendChild(row);
+    scrollBottom();
+    return row;
+  }
+
+  function addAgentMsg(text, toolCalls, pendingRefund = null) {
+    const row = document.createElement('div');
+    row.className = 'msg-row agent';
+    if (toolCalls && toolCalls.length) {
+      const trace = document.createElement('div');
+      trace.className = 'tool-trace';
+      toolCalls.forEach(label => {
+        const chip = document.createElement('span');
+        chip.className = 'tool-chip';
+        chip.textContent = label;
+        trace.appendChild(chip);
+      });
+      row.appendChild(trace);
+    }
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    b.textContent = text;
+    row.appendChild(b);
+    if (pendingRefund) {
+      const card = document.createElement('div');
+      card.className = 'confirmation-card';
+      const title = document.createElement('div');
+      title.className = 'confirmation-title';
+      title.textContent = 'Confirm refund';
+      const details = document.createElement('div');
+      details.className = 'confirmation-details';
+      details.textContent = `${pendingRefund.order_id} · $${Number(pendingRefund.amount).toFixed(2)} · ${pendingRefund.payment_destination}`;
+      const button = document.createElement('button');
+      button.className = 'confirm-button';
+      button.textContent = 'Confirm refund';
+      button.addEventListener('click', () => confirmRefund(button));
+      card.append(title, details, button);
+      row.appendChild(card);
+    }
+    msgs.appendChild(row);
+    scrollBottom();
+  }
+
+  async function confirmRefund(button) {
+    if (!sessionId || busy) return;
+    busy = true;
+    button.disabled = true;
+    addUserMsg('Confirm refund');
+    const typing = addTyping();
+    try {
+      const res = await fetch(`/confirm/${sessionId}`, { method: 'POST' });
+      const data = await res.json();
+      typing.remove();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Confirmation failed');
+      }
+      addAgentMsg(
+        `${data.message} Reference: ${data.refund_id}.`,
+        ['Refund confirmed by application'],
+      );
+    } catch (error) {
+      typing.remove();
+      addAgentMsg(error.message || 'The refund could not be confirmed. Please try again.', []);
+      button.disabled = false;
+    } finally {
+      busy = false;
+    }
+  }
+
+  function scrollBottom() { msgs.scrollTop = msgs.scrollHeight; }
+
+  async function send() {
+    const text = input.value.trim();
+    if (!text || busy || !sessionId) return;
+    busy = true;
+    btnSend.disabled = true;
+    input.value = '';
+    input.style.height = 'auto';
+    addUserMsg(text);
+    const typing = addTyping();
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, session_id: sessionId }),
+      });
+      if (!res.ok) throw new Error('Server error ' + res.status);
+      const data = await res.json();
+      typing.remove();
+      addAgentMsg(
+        data.reply,
+        data.tool_calls,
+        data.confirmation_required ? data.pending_refund : null,
+      );
+    } catch {
+      typing.remove();
+      addAgentMsg('Something went wrong. Please try again.', []);
+    } finally {
+      busy = false;
+      btnSend.disabled = false;
+      input.focus();
+    }
+  }
+
+  startSession('guest');
+</script>
+</body>
+</html>
