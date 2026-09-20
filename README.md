@@ -245,18 +245,7 @@ The suite covers:
 * Multi turn agent trajectories
 * Session, chat and confirmation endpoint control flow
 
-Optional linting is configured in `pyproject.toml`:
 
-```bash
-python -m pip install ruff
-ruff check .
-```
-
-Live smoke scenarios require an Anthropic key and run separately:
-
-```bash
-python test_scenarios.py
-```
 
 ---
 
